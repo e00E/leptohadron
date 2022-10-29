@@ -1,0 +1,10 @@
+[package]
+name = "leptohadron"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+crossterm = "0.25"
+humansize = "2.0"
+tui = "0.19"
