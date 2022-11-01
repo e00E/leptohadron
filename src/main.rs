@@ -1,3 +1,10 @@
+// todos:
+// - handle %PROVIDES%, for example mailcap provides mime-types
+
+// ideas:
+// - mode where left side shows only explicit installed and is recursive so you get a list of all packages
+//   you'd have to remove
+
 mod installed_packages;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -17,34 +24,6 @@ use tui::{
     Frame, Terminal,
 };
 
-// TODO: search, filter explicit
-// handle %PROVIDES%, for example mailcap provides mime-types
-// mode where left side shows only explicit installed and is recursive so you get a list of all packages
-// you'd have to remove
-
-/*
-fn _parse_db() {
-    let path = "/var/lib/pacman/sync/core.db";
-    let file = std::fs::File::open(path).unwrap();
-    let file = std::io::BufReader::new(file);
-    let mut decoder = flate2::bufread::GzDecoder::new(file);
-    let mut bytes: Vec<u8> = Default::default();
-    decoder.read_to_end(&mut bytes).unwrap();
-    let bytes = bytes;
-    let mut archive = tar::Archive::new(bytes.as_slice());
-    for entry in archive.entries().unwrap() {
-        let mut entry = entry.unwrap();
-        let path = entry.path().unwrap();
-        let path = path.to_str().unwrap();
-        let type_ = entry.header().entry_type();
-        println!("{path} {type_:?}");
-        let mut contents: Vec<u8> = Default::default();
-        entry.read_to_end(&mut contents).unwrap();
-        let contents = std::str::from_utf8(contents.as_slice()).unwrap();
-        println!("{contents}");
-    }
-}
-*/
 
 const HELP: &[(&str, &str)] = &[
     ("left, right", "move between lists"),
