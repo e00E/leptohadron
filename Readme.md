@@ -28,3 +28,11 @@ Based on the main package the content of the side lists changes. The left list s
 
 After identifying and removing packages it can be useful clean up other obsolete packages (orphans) as explained in the [ArchWiki](
 https://wiki.archlinux.org/title/Pacman/Tips_and_tricks#Removing_unused_packages_(orphans)).
+
+# Compile
+
+This is a Rust project. If Rust is installed on the system we can compile and run it through Cargo:
+
+```sh
+cargo run --release
+```
