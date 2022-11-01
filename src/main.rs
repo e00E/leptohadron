@@ -24,7 +24,6 @@ use tui::{
     Frame, Terminal,
 };
 
-
 const HELP: &[(&str, &str)] = &[
     ("left, right", "move between lists"),
     ("up, down, PgUp, PgDown", "move in list"),
