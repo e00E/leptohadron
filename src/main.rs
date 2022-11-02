@@ -1,5 +1,7 @@
 // todos:
 // - handle %PROVIDES%, for example mailcap provides mime-types
+// - better error handling
+// - figure out reasonable way to do logging, maybe print after main ends or detect whether stderr is tty
 
 // ideas:
 // - mode where left side shows only explicit installed and is recursive so you get a list of all packages
@@ -9,7 +11,7 @@ mod installed_packages;
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use crossterm::{
     event::{Event, KeyCode},
     terminal::{EnterAlternateScreen, LeaveAlternateScreen},
@@ -530,39 +532,37 @@ impl<'a> App<'a> {
 }
 
 fn main() -> Result<()> {
-    let path = "/var/lib/pacman/local";
-    let packages: BTreeMap<String, PackageDesc> = installed_packages::from_directory(path)?
+    const PATH: &str = "/var/lib/pacman/local";
+    let packages: BTreeMap<String, PackageDesc> = installed_packages::from_directory(PATH)
+        .with_context(|| format!("failed to load installed packages from {PATH}"))?
         .map(|desc| desc.map(|desc| (desc.name.clone(), desc)))
         .collect::<Result<_>>()?;
     let mut app = App::new(&packages);
 
     let mut stdout = std::io::stdout();
-    crossterm::terminal::enable_raw_mode()?;
-    crossterm::execute!(stdout, EnterAlternateScreen)?;
+    crossterm::terminal::enable_raw_mode().context("enable_raw_mode")?;
+    crossterm::execute!(stdout, EnterAlternateScreen).context("EnterAlternateScreen")?;
     let backend = tui::backend::CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend)?;
+    let mut terminal = Terminal::new(backend).context("Terminal::new")?;
 
     let result = loop {
         match terminal.draw(|frame| app.draw(frame)) {
             Ok(_) => (),
-            Err(err) => break Err(err),
+            Err(err) => break Err(err).context("draw"),
         }
         let event = match crossterm::event::read() {
             Ok(event) => event,
-            Err(err) => break Err(err),
+            Err(err) => break Err(err).context("crossterm::event::read"),
         };
         if app.event(event) {
             break Ok(());
         }
     };
 
-    crossterm::execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-    crossterm::terminal::disable_raw_mode()?;
-    terminal.show_cursor()?;
+    crossterm::execute!(terminal.backend_mut(), LeaveAlternateScreen)
+        .context("LeaveAlternateScreen")?;
+    crossterm::terminal::disable_raw_mode().context("disable_raw_mode")?;
+    terminal.show_cursor().context("show_cursor")?;
 
-    if let Err(err) = result {
-        println!("{:?}", err)
-    }
-
-    Ok(())
+    result
 }
